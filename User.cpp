@@ -1,19 +1,18 @@
 #include <fstream>
-//#include <openssl/sha.h>
+#include <openssl/sha.h>
 #include <cstring>
 #include "User.hpp"
 
-User* User::registerUser(char _username[], char _password[], char _email[])
+User* User::registerUser(String& _username, String& _password, String& _email)
 {
-    if(strlen(_username) > MAX_USERNAME_SIZE || strlen(_email) > MAX_EMAIL_SIZE)
-    {
-        return nullptr;
-    }
     User* newUser = new User();
-    strcpy(newUser->username, _username);
-    //strcpy(newUser->passHash,SHA256(_password));
-    strcpy(newUser->passHash, _password);
-    strcpy(newUser->email,_email);
+    newUser->username = _username;
+    unsigned char* hashtmp = new unsigned char[65];
+    SHA256((const unsigned char*)_password.getData(),_password.Size(),hashtmp);
+    char* h = (char*) hashtmp;
+    newUser->passHash = h;
+    std::cout<<newUser->passHash<<std::endl;
+    newUser->email = _email;
     std::ofstream fout;
     fout.open("user.db",std::ios::app|std::ios::binary);
     if(fout)
@@ -23,7 +22,16 @@ User* User::registerUser(char _username[], char _password[], char _email[])
     fout.close();
     return newUser;
 }
-User* User::loginUser(char _username[], char _password[])
+void readStringFromFile(String& container, std::ifstream in)
+{
+    char symbol=' ';
+    while(symbol != '\0')
+    {
+        in.read(&symbol,sizeof(symbol));
+        container.append(&symbol);
+    }
+}
+User* User::loginUser(String _username, String _password)
 {
     User* tmp = new User;
     bool flag = false;
@@ -31,10 +39,16 @@ User* User::loginUser(char _username[], char _password[])
     fin.open("user.db",std::ios::binary);
     while(fin.read((char*)tmp, sizeof(User)))
     {
-        //if(!strcmp(_username, tmp.username) && !strcmp(SHA256(_password), tmp.passHash))
+        
         std::cout<<tmp->username<<" "<<tmp->passHash<<std::endl;
         std::cout<<_username << " " << _password<<std::endl;
-        if(!strcmp(_username, tmp->username) && !strcmp(_password, tmp->passHash))
+        //if(_username == tmp->username && !strcmp(_password, tmp->passHash))
+        unsigned char* hashtmp = new unsigned char[65];
+        SHA256((const unsigned char*)_password.getData(),_password.Size(),hashtmp);
+        String hash;
+        
+        hash = (char*)*hashtmp;
+        if(_username == tmp->username && hash == tmp->passHash)
         {
             std::cout<<"TUKA"<<std::endl;
             flag = true;

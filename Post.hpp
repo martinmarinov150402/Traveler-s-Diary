@@ -3,7 +3,7 @@ class Post
 {
     private:
         int id;
-        char authorName[MAX_USERNAME_SIZE];
+        String authorName;
         int grade;
         char dateStart[11];
         char dateEnd[11];
