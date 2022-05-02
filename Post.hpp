@@ -1,13 +1,16 @@
 #include "User.hpp"
+#include "string.h"
 class Post
 {
     private:
         int id;
-        String authorName;
         int grade;
-        char dateStart[11];
-        char dateEnd[11];
-        char comment[1001];
+        String authorName;
+        String dateStart;
+        String dateEnd;
+        String comment;
 
+    public:
+        void writePostInFile(std::ofstream& out);
         
 };

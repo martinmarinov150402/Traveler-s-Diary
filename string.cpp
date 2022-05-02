@@ -23,8 +23,6 @@ void String::copy(String& other)
 }
 String::String(String& other)
 {
-    std::cout<<other<<std::endl;
-    std::cout<<&other<<std::endl;
     size = other.size;
     capacity = other.capacity;
     data = new char[capacity];
@@ -57,29 +55,40 @@ String& String::operator=(const char* other)
     strcpy(data,other);
     return *this;
 }
-void String::readFromFile(std::ifstream& in)
+bool String::readFromFile(std::ifstream& in)
 {
     if(!in)
     {
-        return;
+        return false;
     }
     size = 0;
     capacity = DEFAULT_CAPACITY;
     delete[] data;
     data = new char[capacity];
     char sym=' ';
-    while(sym != '\0')
+    bool flag = true;
+    while(sym != '\0' && flag)
     {
-        in.read(&sym,sizeof(sym));
-        if(size + 1 > capacity)
+        
+        flag = flag && in.read(&sym,sizeof(sym));
+        if(sym != '\0')
         {
-            char *tmp = data;
-            capacity *= 2;
-            data = new char[capacity];
-            strcpy(data,tmp);
+            if(size + 1 > capacity)
+            {
+                char *tmp = data;
+                capacity *= 2;
+                data = new char[capacity];
+                strcpy(data,tmp);
+            }
+            data[size++] = sym;
         }
-        data[size++] = sym;
+        
     }
+    return flag;
+}
+char String::operator[](size_t idx)
+{
+    return data[idx];
 }
 void String::writeInFile(std::ofstream& out)
 {
@@ -120,6 +129,33 @@ std::ostream& operator<<(std::ostream& out, String const& str)
 {
     out<<str.data;
     return out;
+}
+std::istream& operator>>(std::istream& in, String& str)
+{
+    str.capacity = DEFAULT_CAPACITY;
+    str.size = 0;
+    delete[] str.data;
+    str.data = new char[str.capacity];
+    char sym=' ';
+    do
+    {
+        in.get(sym);
+        if(sym!= '\n' && sym != ' ')
+        {
+            if(str.size == str.capacity)
+            {
+                char* tmp = str.data;
+                str.capacity = str.capacity * 2;
+                str.data = new char[str.capacity];
+                strcpy(str.data,tmp);
+                delete[] tmp;
+            }
+            str.data[str.size++] = sym;
+        }
+    } 
+    while(sym != '\n' && sym != ' ');
+    return in;
+    
 }
 bool String::operator==(String& other)
 {

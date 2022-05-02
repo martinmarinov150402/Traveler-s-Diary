@@ -17,19 +17,12 @@ User* User::registerUser(String& _username, String& _password, String& _email)
     fout.open("user.db",std::ios::app|std::ios::binary);
     if(fout)
     {
-        fout.write((char*)newUser, sizeof(User));
+        newUser->username.writeInFile(fout);
+        newUser->passHash.writeInFile(fout);
+        newUser->email.writeInFile(fout);
     }
     fout.close();
     return newUser;
-}
-void readStringFromFile(String& container, std::ifstream in)
-{
-    char symbol=' ';
-    while(symbol != '\0')
-    {
-        in.read(&symbol,sizeof(symbol));
-        container.append(&symbol);
-    }
 }
 User* User::loginUser(String _username, String _password)
 {
@@ -37,28 +30,26 @@ User* User::loginUser(String _username, String _password)
     bool flag = false;
     std::ifstream fin;
     fin.open("user.db",std::ios::binary);
-    while(fin.read((char*)tmp, sizeof(User)))
+    bool flag1 = true;
+    while(!fin.eof() && flag1)
     {
+        flag1 = flag1 && tmp->username.readFromFile(fin);
+        flag1 = flag1 && tmp->passHash.readFromFile(fin);
+        flag1 = flag1 && tmp->email.readFromFile(fin);
         
-        std::cout<<tmp->username<<" "<<tmp->passHash<<std::endl;
-        std::cout<<_username << " " << _password<<std::endl;
-        //if(_username == tmp->username && !strcmp(_password, tmp->passHash))
         unsigned char* hashtmp = new unsigned char[65];
         SHA256((const unsigned char*)_password.getData(),_password.Size(),hashtmp);
         String hash;
         
-        hash = (char*)*hashtmp;
+        hash = (char*)hashtmp;
         if(_username == tmp->username && hash == tmp->passHash)
         {
-            std::cout<<"TUKA"<<std::endl;
             flag = true;
             break;
         }
     }
     if(flag)
     {
-        std::cout << tmp;
-
         return tmp;
     }
     else

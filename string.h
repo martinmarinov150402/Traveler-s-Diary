@@ -16,8 +16,9 @@ class String
         String& operator=(String& other);
         String& operator=(char* other);
         String& operator=(const char other[]);
-        void readFromFile(std::ifstream& in);
+        bool readFromFile(std::ifstream& in);
         void writeInFile(std::ofstream& out);
+        char operator[](size_t idx);
         String(String& other);
         String(char* other);
         ~String();
@@ -28,5 +29,6 @@ class String
         const char* getData();
     
     friend std::ostream& operator<<(std::ostream& out, String const& str);
+    friend std::istream& operator>>(std::istream& in, String& str);
 };
 #endif

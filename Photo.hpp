@@ -1,8 +1,11 @@
+#include "string.h"
+
 class Photo
 {
     private:
         int postId;
-        char photoName[201];
+        String photoName;
     public:
-        static void createPhoto(int _postId, char* _photoName);
+        Photo(int _postId, char* _photoName);
+        void savePhoto();
 };
